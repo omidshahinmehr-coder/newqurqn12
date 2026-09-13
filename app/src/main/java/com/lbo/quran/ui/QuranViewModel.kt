@@ -511,6 +511,24 @@ class QuranViewModel(
 
     fun itemIndexForAyah(aId: String): Int? = _fullQuran.value.ayahItemIndex[aId]
 
+    /**
+     * آیهٔ قبل (direction = -1) یا بعد (direction = 1) نسبت به aId داده‌شده را برمی‌گرداند.
+     * در صورت عبور از ابتدا/انتهای قرآن یا نبود اطلاعات، null برمی‌گردد.
+     */
+    fun adjacentAyahForTafsir(aId: String, direction: Int): Triple<String, String, Int>? {
+        val state = _fullQuran.value
+        val currentIndex = state.ayahItemIndex[aId] ?: return null
+        var idx = currentIndex + direction
+        while (idx in state.items.indices) {
+            val item = state.items[idx]
+            if (item is ReadingItem.Ayah) {
+                return Triple(item.ayah.aId, item.surahNameFa, item.ayah.ayahNumber)
+            }
+            idx += direction
+        }
+        return null
+    }
+
     fun loadSurahList() = viewModelScope.launch {
         _surahList.value = SurahListUiState(loading = true)
         val list = repo.getSurahList()
