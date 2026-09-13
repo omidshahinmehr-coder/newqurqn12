@@ -12,8 +12,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-//import androidx.compose.ui.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -37,9 +37,9 @@ fun TafsirScreen(
     val settings by viewModel.settings.collectAsState()
     val context = LocalContext.current
 
-    var currentAId by remember { mutableStateOf(aId) }
-    var currentSurahName by remember { mutableStateOf(surahName) }
-    var currentAyahNumber by remember { mutableStateOf(ayahNumber) }
+    var currentAId by rememberSaveable { mutableStateOf(aId) }
+    var currentSurahName by rememberSaveable { mutableStateOf(surahName) }
+    var currentAyahNumber by rememberSaveable { mutableStateOf(ayahNumber) }
 
     val previousAyah = remember(currentAId) { viewModel.adjacentAyahForTafsir(currentAId, -1) }
     val nextAyah = remember(currentAId) { viewModel.adjacentAyahForTafsir(currentAId, 1) }
