@@ -7,13 +7,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lbo.quran.ui.theme.quranFontByKey
@@ -32,20 +37,72 @@ fun TafsirScreen(
     val settings by viewModel.settings.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(aId) {
-        viewModel.loadTafsir(aId, surahName, ayahNumber)
+    var currentAId by remember { mutableStateOf(aId) }
+    var currentSurahName by remember { mutableStateOf(surahName) }
+    var currentAyahNumber by remember { mutableStateOf(ayahNumber) }
+
+    val previousAyah = remember(currentAId) { viewModel.adjacentAyahForTafsir(currentAId, -1) }
+    val nextAyah = remember(currentAId) { viewModel.adjacentAyahForTafsir(currentAId, 1) }
+
+    LaunchedEffect(currentAId) {
+        viewModel.loadTafsir(currentAId, currentSurahName, currentAyahNumber)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("تفسیر البرهان — $surahName، آیه $ayahNumber") },
+                title = { Text("تفسیر البرهان — $currentSurahName، آیه $currentAyahNumber") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "بازگشت")
                     }
                 }
             )
+        },
+        bottomBar = {
+            // این ردیف عمداً چپ‌به‌راست است تا «چپ» و «راست» همیشه مطابق موقعیت واقعی روی صفحه باشند،
+            // مستقل از جهت راست‌به‌چپ کلی برنامه.
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Surface(tonalElevation = 3.dp) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // سمت چپ صفحه: رفتن به آیهٔ بعد
+                        TextButton(
+                            onClick = {
+                                nextAyah?.let { (newAId, newSurahName, newAyahNumber) ->
+                                    currentAId = newAId
+                                    currentSurahName = newSurahName
+                                    currentAyahNumber = newAyahNumber
+                                }
+                            },
+                            enabled = nextAyah != null
+                        ) {
+                            Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = "آیه بعد")
+                            Text("آیه بعد")
+                        }
+
+                        // سمت راست صفحه: رفتن به آیهٔ قبل
+                        TextButton(
+                            onClick = {
+                                previousAyah?.let { (newAId, newSurahName, newAyahNumber) ->
+                                    currentAId = newAId
+                                    currentSurahName = newSurahName
+                                    currentAyahNumber = newAyahNumber
+                                }
+                            },
+                            enabled = previousAyah != null
+                        ) {
+                            Text("آیه قبل")
+                            Icon(Icons.Filled.KeyboardArrowRight, contentDescription = "آیه قبل")
+                        }
+                    }
+                }
+            }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -113,7 +170,7 @@ fun TafsirScreen(
                                             type = "text/plain"
                                             putExtra(
                                                 Intent.EXTRA_TEXT,
-                                                "${entry.text}\n\n$sourceLabel — $surahName، آیه $ayahNumber"
+                                                "${entry.text}\n\n$sourceLabel — $currentSurahName، آیه $currentAyahNumber"
                                             )
                                         }
                                         context.startActivity(Intent.createChooser(intent, null))
