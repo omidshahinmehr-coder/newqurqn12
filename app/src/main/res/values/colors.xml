@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#073177</color>
+
+    <!-- رنگ‌های برند: سرمه‌ای مایل به آبی + طلایی (باید با ui/theme/Color.kt هماهنگ بمانند) -->
+    <color name="brand_navy">#1B4079</color>
+    <color name="brand_navy_dark">#0D2547</color>
+    <color name="brand_navy_light">#A9C6FF</color>
+    <color name="brand_navy_bg_dark">#0A1730</color>
 </resources>
