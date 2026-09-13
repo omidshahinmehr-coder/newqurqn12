@@ -26,11 +26,16 @@ class QuranAudioService : MediaSessionService() {
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = mediaSession
 
+    // وقتی برنامه از لیست برنامه‌های اخیر (Recents) بسته می‌شود، پخش باید کاملاً متوقف شود؛
+    // این برنامه یک پخش‌کنندهٔ موسیقی پس‌زمینه‌ای مستقل نیست که با بسته‌شدن اپ هم به کارش
+    // ادامه بدهد.
     override fun onTaskRemoved(rootIntent: android.content.Intent?) {
-        val player = mediaSession?.player
-        if (player == null || !player.playWhenReady || player.mediaItemCount == 0) {
-            stopSelf()
+        mediaSession?.player?.apply {
+            playWhenReady = false
+            stop()
+            clearMediaItems()
         }
+        stopSelf()
     }
 
     override fun onDestroy() {
