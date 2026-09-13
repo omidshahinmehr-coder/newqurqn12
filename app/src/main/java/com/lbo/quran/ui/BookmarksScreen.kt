@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -28,7 +29,7 @@ fun BookmarksScreen(
 ) {
     val state by viewModel.bookmarksScreen.collectAsState()
     val settings by viewModel.settings.collectAsState()
-    var tabIndex by remember { mutableStateOf(0) }
+    var tabIndex by rememberSaveable { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
         viewModel.loadBookmarks()
