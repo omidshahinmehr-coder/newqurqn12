@@ -149,6 +149,23 @@ fun HomeScreen(
     var showPageDialog by remember { mutableStateOf(false) }
     var pageInput by remember { mutableStateOf("") }
     var pageError by remember { mutableStateOf<String?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // اگر فایل صوتی هیچ‌کدام از آیات صف درخواستی روی دستگاه پیدا نشود (یا در حین پخش با
+    // خطا مواجه شود)، به‌جای سکوت بی‌دلیل، پیام مناسب نشان می‌دهیم و امکان رفتن مستقیم
+    // به تنظیمات صوت را با یک دکمه فراهم می‌کنیم.
+    LaunchedEffect(Unit) {
+        viewModel.audioController.audioMissingEvent.collect {
+            val result = snackbarHostState.showSnackbar(
+                message = "فایل صوتی این آیه روی دستگاه پیدا نشد. از تنظیمات صوت، فایل‌ها را دانلود کنید.",
+                actionLabel = "تنظیمات صوت",
+                duration = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onOpenAudioSettings()
+            }
+        }
+    }
 
     // پنجره‌ی پخش پس از چند ثانیه بی‌تحرکی، خودش را محو می‌کند تا جای بیشتری برای متن آیه باز
     // شود؛ با لمس هر نقطه‌ای از صفحه دوباره ظاهر می‌شود و تایمر از نو شروع می‌شود.
@@ -360,6 +377,7 @@ fun HomeScreen(
         }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 Column {
                     TopAppBar(
