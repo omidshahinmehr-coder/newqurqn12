@@ -138,7 +138,7 @@ fun TafsirScreen(
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                         ) {
                             SelectionContainer {
                                 Text(
