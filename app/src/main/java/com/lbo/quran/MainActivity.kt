@@ -3,7 +3,6 @@ package com.lbo.quran
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,7 +37,7 @@ import com.lbo.quran.ui.SplashScreen
 import com.lbo.quran.ui.SurahPickerScreen
 import com.lbo.quran.ui.TafsirBrowseScreen
 import com.lbo.quran.ui.TafsirScreen
-import com.lbo.quran.ui.theme.AppTypography
+import com.lbo.quran.ui.theme.QuranTheme
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -46,7 +45,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme(typography = AppTypography) {
+            QuranTheme {
                 Surface(modifier = Modifier) {
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         QuranApp()
