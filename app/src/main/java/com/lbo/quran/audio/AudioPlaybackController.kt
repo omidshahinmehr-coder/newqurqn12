@@ -7,8 +7,11 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** بازه‌ی مجاز برای سرعت پخش صوت (۰٫۷ تا ۲ برابر) */
@@ -35,6 +38,12 @@ class AudioPlaybackController(
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
 
+    // رویداد یک‌باره‌ای که وقتی هیچ‌کدام از فایل‌های صوتی صف درخواستی روی دستگاه پیدا نشوند
+    // ساطع می‌شود؛ رابط کاربری با گوش‌دادن به این جریان می‌تواند پیام مناسب نشان داده و
+    // کاربر را به تنظیمات صوتی هدایت کند.
+    private val _audioMissingEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val audioMissingEvent: SharedFlow<Unit> = _audioMissingEvent.asSharedFlow()
+
     private val player: ExoPlayer by lazy {
         (QuranAudioPlayerHolder.player ?: ExoPlayer.Builder(context).build().also {
             QuranAudioPlayerHolder.player = it
@@ -54,6 +63,13 @@ class AudioPlaybackController(
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 _state.value = _state.value.copy(currentIndex = p.currentMediaItemIndex)
             }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                // خطای واقعی پخش (مثلاً فایل خراب یا حذف‌شده در میانه‌ی صف)؛ همان پیام
+                // «فایل صوتی یافت نشد» را نشان می‌دهیم چون از دید کاربر نتیجه یکی است.
+                _state.value = PlaybackUiState(playbackSpeed = _state.value.playbackSpeed)
+                _audioMissingEvent.tryEmit(Unit)
+            }
         })
     }
 
@@ -70,6 +86,9 @@ class AudioPlaybackController(
         val available = aIds.filter { audioRepository.hasAudio(it) }
         if (available.isEmpty()) {
             _state.value = PlaybackUiState(scopeLabel = scopeLabel, playbackSpeed = speed)
+            // هیچ‌کدام از فایل‌های صوتی این صف روی دستگاه پیدا نشد؛ به‌جای سکوت کامل،
+            // به رابط کاربری اطلاع می‌دهیم تا کاربر را به تنظیمات صوت هدایت کند.
+            _audioMissingEvent.tryEmit(Unit)
             return
         }
         val clampedStart = startIndex.coerceIn(0, available.lastIndex)
