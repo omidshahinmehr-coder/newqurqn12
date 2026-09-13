@@ -453,7 +453,7 @@ fun HomeScreen(
                         }
                     )
                     currentAyahItem?.let { meta ->
-                        Surface(color = MaterialTheme.colorScheme.secondaryContainer) {
+                        Surface(color = MaterialTheme.colorScheme.primaryContainer) {
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -555,7 +555,7 @@ fun HomeScreen(
                         }
                     }
                     currentAyahItem?.let { meta ->
-                        Surface(color = MaterialTheme.colorScheme.secondaryContainer) {
+                        Surface(color = MaterialTheme.colorScheme.primaryContainer) {
                             Text(
                                 "صفحه ${meta.ayah.page}",
                                 style = MaterialTheme.typography.labelMedium,
